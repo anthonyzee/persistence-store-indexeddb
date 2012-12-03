@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Basic</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+  	<h3>Console</h3>
+  </div>
+  <div id="divFlush" class="btn">Flush</div>
+  <div id="divSync" class="btn">Sync</div>
+  <div id="divSelect" class="btn btn-success">Select</div>
+  <div id="divInsert" class="btn">Insert</div>
+  <div id="divUpdate" class="btn">Update</div>
+  <div id="divDelete" class="btn">Delete</div>
+  <div id="divNuke" class="btn">Nuke</div>
+  <div id="divMarkUndone" class="btn">Mark Undone</div>
+  <div id="divMarkDone" class="btn">Mark Done</div>
+  <div id="divContent">
+    <table class="table table-bordered table-striped">
+      <caption>TODO</caption>
+      <thead>
+        <tr>
+          <th>Content</th>
+          <th>Done</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>  
+  </div>
+
+  <dl class="dl-horizontal">
+    <dt>Flush</dt>
+    <dd>Commit all pending persistence transaction.</dd>
+    <dt>Sync</dt>
+    <dd>Synchronize all commited transaction to back-end database</dd>
+    <dt>Select</dt>
+    <dd>Retrieve from store and populate the TODO table.</dd>
+    <dt>Insert</dt>
+    <dd>Create a new TODO record with content ("ABCZ").</dd>
+    <dt>Update</dt>
+    <dd>Toggle done flag for all TODO record.</dd>
+    <dt>Delete</dt>
+    <dd>Delete TODO record with content ("ABCZ").</dd>
+    <dt>Nuke</dt>
+    <dd>Clear all record in the database.</dd>
+    <dt>Mark Undone</dt>
+    <dd>AJAX call to server to update 'Done' flag to 'false'.</dd>
+    <dt>Mark Done</dt>
+    <dd>AJAX call to server to update 'Done' flag to 'true'.</dd>
+  </dl>
+</div>
+
+<script src="js/jquery-1.8.0.min.js"></script>
+<script src="js/Lawnchair.js"></script>
+<script src="js/sql2index.js"></script>
+<script src="js/Lawnchair.js"></script>
+<script src="js/adapters/indexed-db.js"></script>    
+<script src="js/plugins/query.js"></script>  
+<script src="lib/persistence/persistence.js"></script>
+<script src="lib/persistence/persistence.store.sql.js"></script>
+<script src="lib/persistence/persistence.store.lawnc.js"></script>
+<script src="lib/persistence/persistence.sync.js" type="application/javascript"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<script>
+$(function(){
+	persistence.store.websql.config(persistence, 'todo-session', 'todo database', 5*1024*1024);
+	var Todo = persistence.define('todo', {
+		content: 'TEXT',
+		done: 'TEXT'
+	});
+	Todo.enableSync('/todoUpdates'); //this will create the table with sync attributes
+	persistence.schemaSync();
+	
+	$("#divSelect").click(function(e) {
+		$("tbody").html("");
+		Todo.all().list(function(items){	
+			items.forEach(function(item){
+				$("tbody").append("<tr><td>"+item.content+"</td><td>"+item.done+"</td></tr>");
+			});
+		});
+		$("#divSelect").removeClass("btn-success");
+	});
+	
+	$("#divDelete").click(function(e) {
+    Todo.all().filter('content','=',"ABCZ").list(function(items){
+			items.forEach(function(item){
+				persistence.remove(item); //remove client side, 1st sync remove server side but repopulate client side, need to remove client side again!!
+			});
+		});
+		$("#divFlush").addClass("btn-warning");			
+  });
+	
+	$("#divNuke").click(function(e) {
+  	Todo.all().destroyAll();  
+		$("#divFlush").addClass("btn-warning");			
+  });
+
+	$("#divInsert").click(function(e) {
+		var t = new Todo();
+		t.content = "ABCZ";
+		t.done = false;    
+		persistence.add(t);		
+		$("#divFlush").addClass("btn-warning");	
+  });
+	
+	$("#divUpdate").click(function(e) {
+		Todo.all().filter('content','=',"ABCZ").one(function(item){
+			if (item.done){
+				item.done = false;
+			}else{
+				item.done = true;
+			}
+		});
+		$("#divFlush").addClass("btn-warning");			
+  });
+	
+	$("#divMarkDone").click(function(e) {
+  	persistence.sync.getJSON('/markAllDone', function(data) {
+			$("#divSync").addClass("btn-danger");						
+			alert(data.status);
+		});
+  });
+
+	$("#divMarkUndone").click(function(e) {
+  	persistence.sync.getJSON('/markAllUndone', function(data) {
+			$("#divSync").addClass("btn-danger");						
+			alert(data.status);
+		});    
+  });
+	
+	$("#divFlush").click(function(e) {
+		persistence.flush(function(){    
+			$("#divFlush").removeClass("btn-warning");
+			$("#divSync").addClass("btn-danger");			
+			$("#divSelect").addClass("btn-success");
+			alert("Done Flush");
+		});
+  });
+	
+	$("#divSync").click(function(e) {
+		Todo.syncAll(
+			function(conflicts, updatesToPush, callback){alert('Callback');},
+			function(){alert("Done Sync!");},
+			function(){alert("Error");}	
+		);    
+		$("#divSync").removeClass("btn-danger");
+		$("#divSelect").addClass("btn-success");			
+  });
+	
+});
+</script>
+</body>
+</html>
