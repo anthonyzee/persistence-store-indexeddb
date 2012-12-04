@@ -1,4 +1,4 @@
-var strVcap = process.env.VCAP_SERVICES || '{"mysql-5.1":[{"name":"mysql-d70a3","label":"mysql-5.1","plan":"free","tags":["mysql","mysql-5.1","relational"],"credentials":{"name":"todoappdb","hostname":"localhost","host":"localhost","port":3306,"user":"root","username":"root","password":"MyNewPass"}}]}';
+var strVcap = process.env.VCAP_SERVICES || '{"mysql-5.1":[{"name":"mysql-d70a3","label":"mysql-5.1","plan":"free","tags":["mysql","mysql-5.1","relational"],"credentials":{"name":"todoappdb","hostname":"localhost","host":"localhost","port":3306,"user":"root","username":"root","password":"12bluebox"}}]}';
 var jsonVcap = JSON.parse(strVcap);
 
 //persistence declaration
