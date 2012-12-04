@@ -9,9 +9,9 @@ Download persistence.store.indexeddb.js and put it in your web application 'pers
 ## Dependencies
 
 persistence.store.indexeddb.js requires PersistenceJS, LawnchairJS and sql2index.
-Get it from: [http://persistencejs.org/](http://persistencejs.org/)
-Get it from: [http://brian.io/lawnchair/](http://brian.io/lawnchair/)
-Get it from: [https://github.com/anthonyzee/sql2index.js](https://github.com/anthonyzee/sql2index.js)
+* Get PersistenceJS from: [http://persistencejs.org/](http://persistencejs.org/)
+* Get LawnchairJS from: [http://brian.io/lawnchair/](http://brian.io/lawnchair/)
+* Get sql2index from: [https://github.com/anthonyzee/sql2index.js](https://github.com/anthonyzee/sql2index.js)
 
 ## License
 
